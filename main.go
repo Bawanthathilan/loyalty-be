@@ -1,12 +1,17 @@
 package main
 
 import (
+	"loyalty-be/config"
 	"loyalty-be/src/routes"
 	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
+
+func init(){
+	config.LoadEnv()
+}
 
 func main() {
 	router := gin.Default()
