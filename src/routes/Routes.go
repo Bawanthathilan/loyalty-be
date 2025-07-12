@@ -7,11 +7,21 @@ import (
 )
 
 func SetupRoutes(router *gin.RouterGroup) {
-	// Define your routes here--
-	router.GET("/example", func(c *gin.Context) {
-		c.JSON(200, gin.H{"message": "Hello, World!"})
-	})
+	// Login
+    router.GET("/login/:account_id", controllers.Login)
 
-	router.GET("/locations", controllers.GetLocations)
-	router.POST("/searchloyalty", controllers.SearchLoyalty)
+    // Search Accounts
+    router.POST("/search", controllers.Search)
+
+    // Earn Point
+    router.POST("/loyalty/:account_id/accumulate", controllers.Earn)
+
+    // Redeem Point
+    router.POST("/loyalty/:account_id/redeem", controllers.Redeem)
+
+    // Balance
+    router.GET("/loyalty/:account_id/balance", controllers.Balance)
+
+    // History
+    router.GET("/loyalty/:account_id/history", controllers.History)
 }
