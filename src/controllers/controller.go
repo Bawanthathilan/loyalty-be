@@ -14,6 +14,8 @@ import (
 	client "github.com/square/square-go-sdk/client"
 	loyalty "github.com/square/square-go-sdk/loyalty"
 	option "github.com/square/square-go-sdk/option"
+
+	"loyalty-be/models"
 )
 
 func Search(c *gin.Context) {
@@ -52,39 +54,90 @@ func Search(c *gin.Context) {
 	})
 }
 
+type loginRequest struct {
+    PhoneNumber string `json:"phone_number" binding:"required"`
+    Password    string `json:"password"    binding:"required"`
+}
+
 func Login(c *gin.Context) {
-	// 1) Read the account ID from the path
-	accountID := c.Param("account_id")
+    // Bind JSON body
+    var req loginRequest
+    if err := c.ShouldBindJSON(&req); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "phone_number and password are required"})
+        return
+    }
 
-	if accountID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "account_id is required"})
-		return
-	}
+    // Find matching account in our hard-coded slice
+    var acctID string
+    for _, acct := range models.LoyaltyAccounts {
+        if acct.Mapping.PhoneNumber == req.PhoneNumber {
+            if acct.Mapping.Password != req.Password {
+                c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
+                return
+            }
+            acctID = acct.ID
+            break
+        }
+    }
+    if acctID == "" {
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
+        return
+    }
 
-	// 2) Initialize Square client
-	client := client.NewClient(
-		option.WithToken(os.Getenv("SQUARE_ACCESS_TOKEN")),
-		option.WithBaseURL(square.Environments.Sandbox),
-	)
+    // Initialize Square client
+    sq := client.NewClient(
+        option.WithToken(os.Getenv("SQUARE_ACCESS_TOKEN")),
+        option.WithBaseURL(square.Environments.Sandbox),
+    )
 
-	// 3) Call the Get endpoint
-	req := &loyalty.GetAccountsRequest{AccountID: accountID}
-	resp, err := client.Loyalty.Accounts.Get(context.Background(), req)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
+    // Call the Square Loyalty API
+    sdkReq := &loyalty.GetAccountsRequest{AccountID: acctID}
+    sdkResp, err := sq.Loyalty.Accounts.Get(context.Background(), sdkReq)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+        return
+    }
 
-	utils.SaveUserSession(c, accountID)
+    // (Optional) save session
+    utils.SaveUserSession(c, acctID)
+
+    // Return the SDK’s response object
+    c.JSON(http.StatusOK, gin.H{"response": sdkResp.LoyaltyAccount})
+}
+
+// func Login(c *gin.Context) {
+// 	// 1) Read the account ID from the path
+// 	accountID := c.Param("account_id")
+
+// 	if accountID == "" {
+// 		c.JSON(http.StatusBadRequest, gin.H{"error": "account_id is required"})
+// 		return
+// 	}
+
+// 	// 2) Initialize Square client
+// 	client := client.NewClient(
+// 		option.WithToken(os.Getenv("SQUARE_ACCESS_TOKEN")),
+// 		option.WithBaseURL(square.Environments.Sandbox),
+// 	)
+
+// 	// 3) Call the Get endpoint
+// 	req := &loyalty.GetAccountsRequest{AccountID: accountID}
+// 	resp, err := client.Loyalty.Accounts.Get(context.Background(), req)
+// 	if err != nil {
+// 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+// 		return
+// 	}
+
+// 	utils.SaveUserSession(c, accountID)
 	
 
-	// 4) Return the account details
-	acct := resp.LoyaltyAccount
-	c.JSON(http.StatusOK, gin.H{
-		"response": acct,
-	})
+// 	// 4) Return the account details
+// 	acct := resp.LoyaltyAccount
+// 	c.JSON(http.StatusOK, gin.H{
+// 		"response": acct,
+// 	})
 
-}
+// }
 
 func Earn(c *gin.Context) {
 	// 1) Read the account ID from the path

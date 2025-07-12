@@ -12,7 +12,7 @@ import (
 
 func SetupRoutes(router *gin.RouterGroup) {
 	// Login
-    router.GET("/login/:account_id", controllers.Login)
+    router.GET("/login", controllers.Login)
 
     // Search Accounts
     router.POST("/search", controllers.Search)
