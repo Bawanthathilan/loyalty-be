@@ -105,39 +105,6 @@ func Login(c *gin.Context) {
     c.JSON(http.StatusOK, gin.H{"response": sdkResp.LoyaltyAccount})
 }
 
-// func Login(c *gin.Context) {
-// 	// 1) Read the account ID from the path
-// 	accountID := c.Param("account_id")
-
-// 	if accountID == "" {
-// 		c.JSON(http.StatusBadRequest, gin.H{"error": "account_id is required"})
-// 		return
-// 	}
-
-// 	// 2) Initialize Square client
-// 	client := client.NewClient(
-// 		option.WithToken(os.Getenv("SQUARE_ACCESS_TOKEN")),
-// 		option.WithBaseURL(square.Environments.Sandbox),
-// 	)
-
-// 	// 3) Call the Get endpoint
-// 	req := &loyalty.GetAccountsRequest{AccountID: accountID}
-// 	resp, err := client.Loyalty.Accounts.Get(context.Background(), req)
-// 	if err != nil {
-// 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-// 		return
-// 	}
-
-// 	utils.SaveUserSession(c, accountID)
-	
-
-// 	// 4) Return the account details
-// 	acct := resp.LoyaltyAccount
-// 	c.JSON(http.StatusOK, gin.H{
-// 		"response": acct,
-// 	})
-
-// }
 
 func Earn(c *gin.Context) {
 	// 1) Read the account ID from the path
