@@ -17,7 +17,7 @@ func SetupRoutes(router *gin.RouterGroup) {
     router.POST("/loyalty/:account_id/accumulate", controllers.Earn)
 
     // Redeem Point
-    router.POST("/loyalty/:account_id/redeem", controllers.Redeem)
+    router.POST("/loyalty/rewards/:reward_id/redeem", controllers.Redeem)
 
     // Balance
     router.GET("/loyalty/:account_id/balance", controllers.Balance)
