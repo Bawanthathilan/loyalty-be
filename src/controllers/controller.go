@@ -6,7 +6,8 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/gin-contrib/sessions"
+	"loyalty-be/utils"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	square "github.com/square/square-go-sdk"
@@ -74,19 +75,15 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	sess := sessions.Default(c)
-	sess.Set("account_id", resp.LoyaltyAccount.ID)
-	sess.Set("program_id", resp.LoyaltyAccount.ProgramID)
-	if err := sess.Save(); err != nil {
-    c.JSON(http.StatusInternalServerError, gin.H{"error": "could not save session"})
-    return
-  }
+	utils.SaveUserSession(c, accountID)
+	
 
 	// 4) Return the account details
 	acct := resp.LoyaltyAccount
 	c.JSON(http.StatusOK, gin.H{
 		"response": acct,
 	})
+
 }
 
 func Earn(c *gin.Context) {

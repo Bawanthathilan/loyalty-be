@@ -3,8 +3,12 @@ package routes
 import (
 	"loyalty-be/src/controllers"
 
+	"loyalty-be/utils"
+
 	"github.com/gin-gonic/gin"
 )
+
+
 
 func SetupRoutes(router *gin.RouterGroup) {
 	// Login
@@ -14,14 +18,14 @@ func SetupRoutes(router *gin.RouterGroup) {
     router.POST("/search", controllers.Search)
 
     // Earn Point
-    router.POST("/loyalty/:account_id/accumulate", controllers.Earn)
+    router.POST("/loyalty/:account_id/accumulate", utils.RequireSession(), controllers.Earn)
 
     // Redeem Point
-    router.POST("/loyalty/rewards/:reward_id/redeem", controllers.Redeem)
+    router.POST("/loyalty/rewards/:reward_id/redeem", utils.RequireSession(), controllers.Redeem)
 
     // Balance
-    router.GET("/loyalty/:account_id/balance", controllers.Balance)
+    router.GET("/loyalty/:account_id/balance", utils.RequireSession(), controllers.Balance)
 
     // History
-    router.GET("/loyalty/:account_id/history", controllers.History)
+    router.GET("/loyalty/:account_id/history",utils.RequireSession(), controllers.History)
 }
