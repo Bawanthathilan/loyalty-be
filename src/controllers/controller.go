@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	square "github.com/square/square-go-sdk"
@@ -39,7 +40,7 @@ func Search(c *gin.Context) {
 			"id":         *acct.ID,
 			"program_id": acct.ProgramID,
 			"points":     acct.LifetimePoints,
-			"mappings":   acct.Mapping, // phone/customer mappings
+			"mappings":   acct.Mapping, 
 			"created_at": *acct.CreatedAt,
 		})
 	}
@@ -51,7 +52,6 @@ func Search(c *gin.Context) {
 }
 
 func Login(c *gin.Context) {
-
 	// 1) Read the account ID from the path
 	accountID := c.Param("account_id")
 
@@ -73,6 +73,14 @@ func Login(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
+	sess := sessions.Default(c)
+	sess.Set("account_id", resp.LoyaltyAccount.ID)
+	sess.Set("program_id", resp.LoyaltyAccount.ProgramID)
+	if err := sess.Save(); err != nil {
+    c.JSON(http.StatusInternalServerError, gin.H{"error": "could not save session"})
+    return
+  }
 
 	// 4) Return the account details
 	acct := resp.LoyaltyAccount
@@ -107,9 +115,6 @@ func Earn(c *gin.Context) {
             IdempotencyKey: uuid.New().String(),
             LocationID: reqBody.LocationID,
 			AccumulatePoints: &square.LoyaltyEventAccumulatePoints{
-                OrderID: square.String(
-                   *reqBody.AccumulatePoints.OrderID,
-                ),
                 Points: square.Int(
                     *reqBody.AccumulatePoints.Points,
                 ),

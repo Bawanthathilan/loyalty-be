@@ -6,6 +6,8 @@ import (
 	"time"
 
 	"github.com/gin-contrib/cors"
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 )
 
@@ -15,6 +17,9 @@ func init(){
 
 func main() {
 	router := gin.Default()
+
+	store:= cookie.NewStore([]byte("secret"))
+	router.Use(sessions.Sessions("loyalty_session", store))
 
 	router.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"*"}, // Allow all origins, change this in production
