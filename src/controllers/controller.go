@@ -10,7 +10,7 @@ import (
 	"github.com/google/uuid"
 	square "github.com/square/square-go-sdk"
 	client "github.com/square/square-go-sdk/client"
-	"github.com/square/square-go-sdk/loyalty"
+	loyalty "github.com/square/square-go-sdk/loyalty"
 	option "github.com/square/square-go-sdk/option"
 )
 
@@ -82,6 +82,47 @@ func Login(c *gin.Context) {
 }
 
 func Earn(c *gin.Context) {
+	// 1) Read the account ID from the path
+	account_id := c.Param("account_id")
+
+	if account_id == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "account_id is required"})
+		return
+	}
+
+	// 2) Initialize Square client
+	client := client.NewClient(
+		option.WithToken(os.Getenv("SQUARE_ACCESS_TOKEN")),
+		option.WithBaseURL(square.Environments.Sandbox),
+	)
+
+	var reqBody loyalty.AccumulateLoyaltyPointsRequest
+	if err := c.ShouldBindJSON(&reqBody); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	resp, err := client.Loyalty.Accounts.AccumulatePoints(context.TODO(), &loyalty.AccumulateLoyaltyPointsRequest{
+			AccountID: account_id,
+            IdempotencyKey: uuid.New().String(),
+            LocationID: reqBody.LocationID,
+			AccumulatePoints: &square.LoyaltyEventAccumulatePoints{
+                OrderID: square.String(
+                   *reqBody.AccumulatePoints.OrderID,
+                ),
+                Points: square.Int(
+                    *reqBody.AccumulatePoints.Points,
+                ),
+            },
+	})
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"response": resp,
+	})
 
 }
 
