@@ -11,11 +11,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	square "github.com/square/square-go-sdk"
-	client "github.com/square/square-go-sdk/client"
 	loyalty "github.com/square/square-go-sdk/loyalty"
-	option "github.com/square/square-go-sdk/option"
 
-	"loyalty-be/models"
+	"loyalty-be/data"
+	"loyalty-be/src/services"
 )
 
 
@@ -35,7 +34,7 @@ func Login(c *gin.Context) {
 
     // Find matching account in our hard-coded slice
     var acctID string
-    for _, acct := range models.LoyaltyAccounts {
+    for _, acct := range data.LoyaltyAccounts {
         if acct.Mapping.PhoneNumber == req.PhoneNumber {
             if acct.Mapping.Password != req.Password {
                 c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
@@ -51,10 +50,7 @@ func Login(c *gin.Context) {
     }
 
     // Initialize Square client
-    sq := client.NewClient(
-        option.WithToken(os.Getenv("SQUARE_ACCESS_TOKEN")),
-        option.WithBaseURL(square.Environments.Sandbox),
-    )
+    sq := services.GetSquareClient()
 
     // Call the Square Loyalty API
     sdkReq := &loyalty.GetAccountsRequest{AccountID: acctID}
@@ -74,10 +70,7 @@ func Login(c *gin.Context) {
 
 func Earn(c *gin.Context) {
 	// 2) Initialize Square client
-	client := client.NewClient(
-		option.WithToken(os.Getenv("SQUARE_ACCESS_TOKEN")),
-		option.WithBaseURL(square.Environments.Sandbox),
-	)
+	client := services.GetSquareClient()
 
 	var reqBody loyalty.AccumulateLoyaltyPointsRequest
 	if err := c.ShouldBindJSON(&reqBody); err != nil {
@@ -117,10 +110,7 @@ func Redeem(c *gin.Context) {
 	}
 
 	// 2) Initialize Square client
-	client := client.NewClient(
-		option.WithToken(os.Getenv("SQUARE_ACCESS_TOKEN")),
-		option.WithBaseURL(square.Environments.Sandbox),
-	)
+	client := services.GetSquareClient()
 
 	resp, err := client.Loyalty.Rewards.Redeem(context.TODO(), &loyalty.RedeemLoyaltyRewardRequest{
 		RewardID:       reward_id,
@@ -140,10 +130,7 @@ func Redeem(c *gin.Context) {
 
 func Balance(c *gin.Context) {
 	// 2) Initialize Square client
-	client := client.NewClient(
-		option.WithToken(os.Getenv("SQUARE_ACCESS_TOKEN")),
-		option.WithBaseURL(square.Environments.Sandbox),
-	)
+	client := services.GetSquareClient()
 
 	resp, err := client.Loyalty.Accounts.Get(context.TODO(), &loyalty.GetAccountsRequest{
 		AccountID: utils.GetSessionData(c),
@@ -163,10 +150,7 @@ func History(c *gin.Context) {
 
 	var reqBody square.SearchLoyaltyEventsRequest
 
-	client := client.NewClient(
-		option.WithToken(os.Getenv("SQUARE_ACCESS_TOKEN")),
-		option.WithBaseURL(square.Environments.Sandbox),
-	)
+	client := services.GetSquareClient()
 
 	resp, err := client.Loyalty.SearchEvents(context.Background(), &reqBody)
 	if err != nil {
