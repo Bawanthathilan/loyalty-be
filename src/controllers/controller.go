@@ -18,41 +18,7 @@ import (
 	"loyalty-be/models"
 )
 
-func Search(c *gin.Context) {
 
-	var reqBody loyalty.SearchLoyaltyAccountsRequest
-	if err := c.ShouldBindJSON(&reqBody); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	client := client.NewClient(
-		option.WithToken(os.Getenv("SQUARE_ACCESS_TOKEN")),
-		option.WithBaseURL(square.Environments.Sandbox),
-	)
-
-	resp, err := client.Loyalty.Accounts.Search(context.Background(), &reqBody)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	var accounts []gin.H
-	for _, acct := range resp.LoyaltyAccounts {
-		accounts = append(accounts, gin.H{
-			"id":         *acct.ID,
-			"program_id": acct.ProgramID,
-			"points":     acct.LifetimePoints,
-			"mappings":   acct.Mapping, 
-			"created_at": *acct.CreatedAt,
-		})
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"accounts": accounts,
-		"cursor":   resp.Cursor,
-	})
-}
 
 type loginRequest struct {
     PhoneNumber string `json:"phone_number" binding:"required"`
@@ -107,14 +73,6 @@ func Login(c *gin.Context) {
 
 
 func Earn(c *gin.Context) {
-	// 1) Read the account ID from the path
-	account_id := c.Param("account_id")
-
-	if account_id == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "account_id is required"})
-		return
-	}
-
 	// 2) Initialize Square client
 	client := client.NewClient(
 		option.WithToken(os.Getenv("SQUARE_ACCESS_TOKEN")),
@@ -128,9 +86,9 @@ func Earn(c *gin.Context) {
 	}
 
 	resp, err := client.Loyalty.Accounts.AccumulatePoints(context.TODO(), &loyalty.AccumulateLoyaltyPointsRequest{
-			AccountID: account_id,
+			AccountID: utils.GetSessionData(c),
             IdempotencyKey: uuid.New().String(),
-            LocationID: reqBody.LocationID,
+            LocationID: os.Getenv("SQUARE_LOCATION_ID"),
 			AccumulatePoints: &square.LoyaltyEventAccumulatePoints{
                 Points: square.Int(
                     *reqBody.AccumulatePoints.Points,
@@ -164,15 +122,9 @@ func Redeem(c *gin.Context) {
 		option.WithBaseURL(square.Environments.Sandbox),
 	)
 
-	var reqBody loyalty.RedeemLoyaltyRewardRequest
-	if err := c.ShouldBindJSON(&reqBody); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
 	resp, err := client.Loyalty.Rewards.Redeem(context.TODO(), &loyalty.RedeemLoyaltyRewardRequest{
 		RewardID:       reward_id,
-		LocationID:     reqBody.LocationID,
+		LocationID:    os.Getenv("SQUARE_LOCATION_ID"),
 		IdempotencyKey: uuid.New().String(),
 	})
 
@@ -187,9 +139,50 @@ func Redeem(c *gin.Context) {
 }
 
 func Balance(c *gin.Context) {
+	// 2) Initialize Square client
+	client := client.NewClient(
+		option.WithToken(os.Getenv("SQUARE_ACCESS_TOKEN")),
+		option.WithBaseURL(square.Environments.Sandbox),
+	)
 
+	resp, err := client.Loyalty.Accounts.Get(context.TODO(), &loyalty.GetAccountsRequest{
+		AccountID: utils.GetSessionData(c),
+	})
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"response": resp.LoyaltyAccount,
+	})
 }
 
 func History(c *gin.Context) {
 
+	var reqBody square.SearchLoyaltyEventsRequest
+
+	client := client.NewClient(
+		option.WithToken(os.Getenv("SQUARE_ACCESS_TOKEN")),
+		option.WithBaseURL(square.Environments.Sandbox),
+	)
+
+	resp, err := client.Loyalty.SearchEvents(context.Background(), &reqBody)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	var accounts []gin.H
+	for _, acct := range resp.Events {
+		accounts = append(accounts, gin.H{
+			"response": acct,
+		})
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"accounts": accounts,
+		"cursor":   resp.Cursor,
+	})
 }

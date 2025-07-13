@@ -22,7 +22,7 @@ func main() {
 	router.Use(sessions.Sessions("loyalty_session", store))
 
 	router.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"*"}, // Allow all origins, change this in production
+		AllowOrigins:     []string{"http://localhost:5173"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization", "Square-Version"},
 		ExposeHeaders:    []string{"Content-Length"},

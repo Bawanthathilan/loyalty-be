@@ -12,20 +12,17 @@ import (
 
 func SetupRoutes(router *gin.RouterGroup) {
 	// Login
-    router.GET("/login", controllers.Login)
-
-    // Search Accounts
-    router.POST("/search", controllers.Search)
+    router.POST("/login", controllers.Login)
 
     // Earn Point
-    router.POST("/loyalty/:account_id/accumulate", utils.RequireSession(), controllers.Earn)
+    router.POST("/loyalty/accumulate", utils.RequireSession(), controllers.Earn)
 
     // Redeem Point
     router.POST("/loyalty/rewards/:reward_id/redeem", utils.RequireSession(), controllers.Redeem)
 
     // Balance
-    router.GET("/loyalty/:account_id/balance", utils.RequireSession(), controllers.Balance)
+    router.GET("/loyalty/balance", utils.RequireSession(), controllers.Balance)
 
     // History
-    router.GET("/loyalty/:account_id/history",utils.RequireSession(), controllers.History)
+    router.GET("/loyalty/history",utils.RequireSession(), controllers.History)
 }

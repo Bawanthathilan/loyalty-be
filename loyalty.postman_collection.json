@@ -1,0 +1,276 @@
+{
+	"info": {
+		"_postman_id": "eb3a257f-faef-4217-bc99-0db4077a937e",
+		"name": "loyalty",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "10397631"
+	},
+	"item": [
+		{
+			"name": "Retrieve loyalty program",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer EAAAl6wMgzgiTETzOBnR3cRexo0v5uLdOlnGeBn1Cj71pKRIiSGz3bfdwqmjw02N",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "https://connect.squareupsandbox.com/v2/loyalty/programs/main",
+					"protocol": "https",
+					"host": [
+						"connect",
+						"squareupsandbox",
+						"com"
+					],
+					"path": [
+						"v2",
+						"loyalty",
+						"programs",
+						"main"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Loyalty Account",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer EAAAl6wMgzgiTETzOBnR3cRexo0v5uLdOlnGeBn1Cj71pKRIiSGz3bfdwqmjw02N",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"loyalty_account\": {\n      \"mapping\": {\n        \"phone_number\": \"+94768327247\"\n      },\n      \"program_id\": \"6b12bf92-0469-4071-9432-43d74ca7d74b\"\n    },\n    \"idempotency_key\": \"ec78c477-b1c3-4899-a209-a4e71337c996\"\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://connect.squareupsandbox.com/v2/loyalty/accounts",
+					"protocol": "https",
+					"host": [
+						"connect",
+						"squareupsandbox",
+						"com"
+					],
+					"path": [
+						"v2",
+						"loyalty",
+						"accounts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer EAAAl6wMgzgiTETzOBnR3cRexo0v5uLdOlnGeBn1Cj71pKRIiSGz3bfdwqmjw02N",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "\n{\n  \"phone_number\": \"+94768327247\",\n  \"password\": \"hunter2\"\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/v1/login",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Earn Points",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer EAAAl6wMgzgiTETzOBnR3cRexo0v5uLdOlnGeBn1Cj71pKRIiSGz3bfdwqmjw02N",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"idempotency_key\": \"6512fe39-fbf1-447a-ba11-3b0cca2854bd\",\n    \"location_id\": \"LRV2MPS5DW90Q\",\n    \"accumulate_points\": {\n      \"points\": 1\n    }\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/v1/loyalty/278fd068-2b3c-4d09-9c6c-d5cd8c3bd902/accumulate",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"loyalty",
+						"278fd068-2b3c-4d09-9c6c-d5cd8c3bd902",
+						"accumulate"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Radeem",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer EAAAl6wMgzgiTETzOBnR3cRexo0v5uLdOlnGeBn1Cj71pKRIiSGz3bfdwqmjw02N",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"location_id\": \"LRV2MPS5DW90Q\",\n\"idempotency_key\": \"f4b1e038-c502-4562-81af-3dd7a963ccc7\"\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/v1/loyalty/rewards/22222/redeem",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"loyalty",
+						"rewards",
+						"22222",
+						"redeem"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Balance",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer EAAAl6wMgzgiTETzOBnR3cRexo0v5uLdOlnGeBn1Cj71pKRIiSGz3bfdwqmjw02N",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"location_id\": \"LRV2MPS5DW90Q\",\n\"idempotency_key\": \"f4b1e038-c502-4562-81af-3dd7a963ccc7\"\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/v1/loyalty/rewards/22222/redeem",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"loyalty",
+						"rewards",
+						"22222",
+						"redeem"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "history",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer EAAAl6wMgzgiTETzOBnR3cRexo0v5uLdOlnGeBn1Cj71pKRIiSGz3bfdwqmjw02N",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"location_id\": \"LRV2MPS5DW90Q\",\n\"idempotency_key\": \"f4b1e038-c502-4562-81af-3dd7a963ccc7\"\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/v1/loyalty/rewards/22222/redeem",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"loyalty",
+						"rewards",
+						"22222",
+						"redeem"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
